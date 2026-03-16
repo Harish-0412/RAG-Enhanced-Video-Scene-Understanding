@@ -1,0 +1,7 @@
+opencv-python
+scenedetect[opencv]
+pandas
+numpy
+faster-whisper
+google-generativeai
+python-dotenv

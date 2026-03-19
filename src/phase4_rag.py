@@ -386,12 +386,13 @@ Never invent information not present in the context.
 
 RULES:
 1. Every factual claim MUST be followed by an inline citation: [S1], [S2], etc.
-2. If the context doesn't contain enough information, say: "The video doesn't cover this clearly in the retrieved segments."
-3. For COMPARE queries — structure your answer with clear sections for each side.
-4. For SUMMARISE queries — write a structured narrative paragraph, not a list.
-5. Always mention the timestamp when citing a specific scene.
-6. Respond in the same language as the user's question.
-7. Be concise but complete — target 150-300 words unless summarising.
+2. If the user asks "when", "at what time", or "where in the video", you MUST identify the specific scene(s) and include the timestamp in your explanation.
+3. If the context doesn't contain enough information, say: "The video doesn't cover this clearly in the retrieved segments."
+4. For COMPARE queries — structure your answer with clear sections for each side.
+5. For SUMMARISE queries — write a structured narrative paragraph, not a list.
+6. Always mention the timestamp when citing a specific scene.
+7. Respond in the same language as the user's question.
+8. Be concise but complete — target 150-300 words unless summarising.
 
 ────────────────────────────────────────────────
 CONVERSATION HISTORY:
@@ -403,7 +404,7 @@ RETRIEVED SCENE CONTEXT:
 DETECTED INTENT: {intent}
 USER QUESTION: {question}
 ────────────────────────────────────────────────
-ANSWER (with citations):
+ANSWER (with citations and timestamps):
 """.strip()
 
 
@@ -852,15 +853,9 @@ if __name__ == "__main__":
         rag = VideoRAG()
         result = rag.ask(args.question, top_k=args.top_k)
         _print_answer(result)
-    elif args.command == "summary":
+    elif command == "summary":
         rag = VideoRAG()
         result = rag.summarise_video()
         _print_answer(result)
-
-    elif args.command == "summary":
-        rag    = VideoRAG()
-        result = rag.summarise_video()
-        _print_answer(result)
-
     else:
         run_repl()

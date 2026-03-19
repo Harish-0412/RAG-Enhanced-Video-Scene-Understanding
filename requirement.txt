@@ -5,3 +5,8 @@ numpy
 faster-whisper
 google-generativeai
 python-dotenv
+fastapi
+uvicorn[standard]
+python-multipart
+chromadb
+sentence-transformers

@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+venv/
+.venv/
+env/
+
+# Environment
+.env
+.env.local
+
+# Data (large files)
+data/input_videos/
+data/audio/
+data/uploads/
+data/processed/audio/
+data/processed/frames/
+
+# ChromaDB
+chroma_db/
+
+# Next.js
+web/.next/
+web/node_modules/
+web/.env.local
+
+# Logs
+data/logs/
+*.jsonl
+
+# OS
+.DS_Store
+Thumbs.db

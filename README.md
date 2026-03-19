@@ -738,7 +738,9 @@ This project is licensed under the MIT License. See LICENSE file for details.
 
 ## 👨‍💻 Authors & Contributors
 
-- **Harish-0412** — Project Creator & Lead Developer
+- **Harish-0412** — Project Creator, Research & Lead Developer
+- **Dharsan6** — UI and UX
+- **AkashB-Glitch** - Backend and API
 
 ---
 

@@ -164,7 +164,7 @@ export default function ChatPage() {
         role: "assistant",
         content: data.answer,
         timestamp: data.timestamp,
-        timestamps: data.citations?.map((cit: any) => ({
+        timestamps: data.citations?.map((cit: { timestamp?: string; visual_summary?: string }) => ({
           timestamp: cit.timestamp || 0,
           formatted: cit.timestamp || "00:00",
           context: cit.visual_summary?.substring(0, 100) + "..." || ""
@@ -178,7 +178,7 @@ export default function ChatPage() {
         videoRef.current.play();
         setIsPlaying(true);
       }
-    } catch (err) {
+    } catch {
       setMessages((prev) => [
         ...prev,
         {

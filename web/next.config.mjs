@@ -1,17 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: "export",
+  basePath: "/RAG-Enhanced-Video-Scene-Understanding",
   reactStrictMode: true,
-  experimental: {
-    typedRoutes: true
-  },
-  async rewrites() {
-    return [
-      {
-        source: "/api/:path*",
-        destination: `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8001"}/:path*`,
-      },
-    ];
-  },
+  images: { unoptimized: true },
 };
 
 export default nextConfig;

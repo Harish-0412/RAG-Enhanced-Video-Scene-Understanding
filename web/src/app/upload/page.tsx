@@ -2,8 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { useDropzone } from "react-dropzone";
-import { Upload, FileVideo, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { Upload, FileVideo, AlertCircle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function UploadPage() {
@@ -13,23 +12,22 @@ export default function UploadPage() {
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const [isDragActive, setIsDragActive] = useState(false);
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    if (acceptedFiles.length > 0) {
-      setFile(acceptedFiles[0]);
-      setError(null);
-    }
+  const handleFile = (f: File) => {
+    setFile(f);
+    setError(null);
+  };
+
+  const onDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragActive(false);
+    const f = e.dataTransfer.files[0];
+    if (f) handleFile(f);
   }, []);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: { "video/*": [] },
-    multiple: false,
-  });
 
   const handleUpload = async () => {
     if (!file) return;
-
     setUploading(true);
     setError(null);
     setStatus("Uploading video...");
@@ -42,34 +40,26 @@ export default function UploadPage() {
         method: "POST",
         body: formData,
       });
-
       if (!response.ok) throw new Error("Upload failed");
-
       const { video_id, extension } = await response.json();
-      
-      // Store video info for the chat page
       localStorage.setItem("current_video_id", video_id);
       localStorage.setItem("current_video_name", file.name);
       localStorage.setItem("current_video_ext", extension);
-
-      // Start polling for status
       pollStatus(video_id);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "An error occurred");
       setUploading(false);
     }
   };
 
-  const pollStatus = async (videoId: string) => {
+  const pollStatus = (videoId: string) => {
     const interval = setInterval(async () => {
       try {
         const response = await fetch(`http://localhost:8001/status/${videoId}`);
         if (!response.ok) throw new Error("Failed to fetch status");
-
         const data = await response.json();
         setStatus(data.status);
         setProgress(data.progress);
-
         if (data.status === "completed") {
           clearInterval(interval);
           router.push("/chat");
@@ -78,7 +68,7 @@ export default function UploadPage() {
           setError(data.error || "Processing failed");
           setUploading(false);
         }
-      } catch (err) {
+      } catch {
         clearInterval(interval);
         setError("Error polling status");
         setUploading(false);
@@ -91,34 +81,35 @@ export default function UploadPage() {
       <div className="max-w-xl w-full bg-white rounded-3xl shadow-xl p-8 md:p-12">
         <div className="text-center mb-10">
           <h1 className="text-3xl font-bold text-slate-900 mb-2">Upload Video</h1>
-          <p className="text-slate-500">
-            Upload your video to start the AI scene analysis
-          </p>
+          <p className="text-slate-500">Upload your video to start the AI scene analysis</p>
         </div>
 
         {!uploading ? (
           <>
-            <div
-              {...getRootProps()}
+            <label
+              onDragOver={(e) => { e.preventDefault(); setIsDragActive(true); }}
+              onDragLeave={() => setIsDragActive(false)}
+              onDrop={onDrop}
               className={cn(
-                "border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-all",
-                isDragActive
-                  ? "border-primary bg-primary/5"
-                  : "border-slate-200 hover:border-slate-300 hover:bg-slate-50",
+                "border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-all flex flex-col items-center",
+                isDragActive ? "border-primary bg-primary/5" : "border-slate-200 hover:border-slate-300 hover:bg-slate-50",
                 file && "border-green-200 bg-green-50"
               )}
             >
-              <input {...getInputProps()} />
+              <input
+                type="file"
+                accept="video/*"
+                className="hidden"
+                onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
+              />
               {file ? (
-                <div className="flex flex-col items-center">
+                <>
                   <FileVideo className="w-16 h-16 text-green-500 mb-4" />
                   <p className="text-slate-900 font-medium">{file.name}</p>
-                  <p className="text-slate-500 text-sm">
-                    {(file.size / (1024 * 1024)).toFixed(2)} MB
-                  </p>
-                </div>
+                  <p className="text-slate-500 text-sm">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
+                </>
               ) : (
-                <div className="flex flex-col items-center">
+                <>
                   <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
                     <Upload className="w-8 h-8 text-slate-400" />
                   </div>
@@ -126,9 +117,9 @@ export default function UploadPage() {
                     {isDragActive ? "Drop the video here" : "Drag & drop your video"}
                   </p>
                   <p className="text-slate-500 text-sm">or click to browse files</p>
-                </div>
+                </>
               )}
-            </div>
+            </label>
 
             {error && (
               <div className="mt-6 p-4 bg-red-50 border border-red-100 rounded-xl flex items-center gap-3 text-red-600">
@@ -149,10 +140,7 @@ export default function UploadPage() {
           <div className="text-center py-12">
             <div className="relative w-32 h-32 mx-auto mb-8">
               <div className="absolute inset-0 border-4 border-slate-100 rounded-full"></div>
-              <div
-                className="absolute inset-0 border-4 border-primary rounded-full border-t-transparent animate-spin"
-                style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 0 100%)" }}
-              ></div>
+              <div className="absolute inset-0 border-4 border-primary rounded-full border-t-transparent animate-spin"></div>
               <div className="absolute inset-0 flex items-center justify-center">
                 <span className="text-xl font-bold text-slate-900">{progress}%</span>
               </div>

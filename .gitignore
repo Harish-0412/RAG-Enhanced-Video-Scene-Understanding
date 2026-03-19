@@ -29,6 +29,8 @@ chroma_db/
 web/.next/
 web/node_modules/
 web/.env.local
+web/out/
+web/tsconfig.tsbuildinfo
 
 # Logs
 data/logs/

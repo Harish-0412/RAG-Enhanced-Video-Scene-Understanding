@@ -23,16 +23,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-          cache-dependency-path: web/package-lock.json
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
         working-directory: web
 
       - name: Build
         run: npm run build
         working-directory: web
+
+      - name: Add .nojekyll
+        run: touch web/out/.nojekyll
 
       - uses: actions/upload-pages-artifact@v3
         with:
